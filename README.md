@@ -19,11 +19,11 @@ Como parte del ejercicio de verificación se añadió una *salt* para garantizar
 
 ```js
 const salt = saltParam === 0 ? Math.random().toFixed(3).toString() : saltParam;
-    const hash = CryptoJS.SHA512(message + salt);
-    return {
-        salt,
-        hashString: hash.toString(CryptoJS.enc.Base64)
-    }
+const hash = CryptoJS.SHA512(message + salt);
+return {
+    salt,
+    hashString: hash.toString(CryptoJS.enc.Base64)
+}
 ```
 
 En este ejemplo, el usuario *Pablo*, solicitará la generación de un Hash a partir del mensaje: *Seguridad informática*. La petición **POST** se hará a la dirección **http://server_ip:puerto/sec/hash**.
@@ -53,18 +53,18 @@ La generación y verificación de la firma digital se realizó con las librería
 
 ```js
 const hash = CryptoJS.SHA256(message).toString(CryptoJS.enc.Base64);
-    const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-        modulusLength: 2048,
-        publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
-        privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
-    });
-    const cipherText = crypto.privateEncrypt({
-        key: privateKey,
-        padding: crypto.constants.RSA_PKCS1_PADDING,
-        oaepHash: 'sha256'
-    }, Buffer.from(hash));
-    return {
-        signature: cipherText.toString('base64'), publicKey };
+const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
+  modulusLength: 2048,
+  publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
+  privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+});
+const cipherText = crypto.privateEncrypt({
+  key: privateKey,
+  padding: crypto.constants.RSA_PKCS1_PADDING,
+  oaepHash: 'sha256'
+}, Buffer.from(hash));
+return {
+  signature: cipherText.toString('base64'), publicKey };
 ```
 
 Supongamos que queremos generar una firma a partir del mensaje *Seguridad informática*, por lo que hacemos **POST** a la dirección **http://server_ip:puerto/sec/sign**.
@@ -139,17 +139,17 @@ Para realizar el cifrado y decifrado del algoritmo RSA se utilizó la librería 
 
 ```js
 const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-        modulusLength: 2048,
-        publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
-        privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
-    });
-    return {
-        cipherText: crypto.publicEncrypt({
-            key: publicKey,
-            padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-            oaepHash: 'sha256'
-        },
-        Buffer.from(message)), privateKey };
+  modulusLength: 2048,
+  publicKeyEncoding: { type: 'pkcs1', format: 'pem' },
+  privateKeyEncoding: { type: 'pkcs8', format: 'pem' }
+});
+return {
+cipherText: crypto.publicEncrypt({
+  key: publicKey,
+  padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
+  oaepHash: 'sha256'
+},
+Buffer.from(message)), privateKey };
 ```
 
 Para poder cifrar tenemos que hacer una consulta **POST** a la dirección **http://server_ip:puerto/sec/rsa/encrypt**, el cuerpo de la consulta solo debe llevar un atributo **message**.
@@ -174,6 +174,43 @@ Para poder decifrar el texto tendremos que hacer una petición **POST** a la dir
 ```
 
 ## Cifrado y decifrado ECIES
+Para la realización del cifrado y decifrado con curvas elipticas se utilizó la librería **eccrypto**, para este ejercicio se utilizó Elliptic Curve Integrated Encryption Scheme (ECIES).
 
+Para cifrar se generaron las llaves publica y privada y se cifró con la llave publica, para decifrar con la privada.
 
+```js
+const privateKey = eccrypto.generatePrivate();
+  const publicKey = eccrypto.getPublic(privateKey);
+  try {
+    return {
+      cipherText: await eccrypto.encrypt(publicKey, Buffer.from(message)),
+      privateKey
+    };    
+  } catch (error) {
+    throw error;
+  }
+```
 
+Para poder cifrar se manda una petición **POST** a la dirección **http://server_ip:puerto/sec/ecies/encrypt**, con solo un atributo **message**, que es el mensaje que se quiere cifrar, el servidor retornará el mensaje cifrado junto a la información necesaria para poder decifrar nuevamente el mensaje.
+
+```json
+{
+  "answer": {
+    "encryptInfo": {
+      "cipherText": "BGz9iknMoTmu46BUiHlo16pE8iYGeSFRWRRMjIU9gXg=",
+      "iv": "PakTpASwWl7jwH4DATntJw==",
+      "mac": "WPcL8WBF7IqG35ZsLO7p/Kksq55iUDdZ2ltKEqrkOVs=",
+      "ephemPublicKey": "BL/ZY4K0AmLqffUSEMNdiJ4WEKnRxgaNAAXMiC5pXc79jJ2ra/frKjGGfta2gbpcBRlXYXuxqo2Re7TKpZZfNjE="
+    },
+    "privateKey": "bWhpEdY5pxs1rgtP6SQ837oGUy1Y4Mowqfyn4/u04xs="
+  }
+}
+```
+
+Si pasamos estos mismos a tributos con una petición **POST** a la dirección **http://server_ip:puerto/sec/ecies/decrypt**, el servidor nos retornará en mensaje decifrado.
+
+```json
+{
+  "answer": "Seguridad informática"
+}
+```
