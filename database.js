@@ -3,8 +3,7 @@ var mongoose = require('mongoose');
 
 async function connect() {
     try {
-        const uri = 'mongodb+srv://' + config.user + ':' + config.password +
-            '@cluster0.k1y6m.mongodb.net/' + config.db + '?retryWrites=true&w=majority';
+        const uri = config.connectionString;
         return await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
     } catch (error) {
         return error;
