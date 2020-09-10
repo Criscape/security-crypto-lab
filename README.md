@@ -1,3 +1,4 @@
+
 # Implementación de librerías criptográficas en Node.js
 
 Este proyecto es un ejercicio de implementación de algunas de las librerías criptográficas más conocidas de Node.js, la idea principal es ver su funcionamiento y características.
@@ -10,7 +11,8 @@ Esta API fue programada en javascript y se utilizó la librería **express** par
 	"connectionString": "mongodb://localhost/mydb"
 }
 ```
-Las funciones que se encargan de utilizar las librerías de criptografia se encuentran dentro del archivo **src/cryptoUtils.js**.
+
+Las funciones que se encargan de utilizar las librerías de criptografía se encuentran dentro del archivo **src/cryptoUtils.js**.
 
 ## Generación y verificación de Hash
 Para la generación de Hash a partir de un mensaje se utilizó la librería **Crypto-JS**, esta librería nos ofrece distintas funciones de Hash aplicables a una *string* dada, la que se decidió en este ejercicio fue **SHA512**.
@@ -34,9 +36,10 @@ En este ejemplo, el usuario *Pablo*, solicitará la generación de un Hash a par
 	"message": "Seguridad informática"
 }
 ```
+
 Si todo funciona correctamente, el registro quedará guardado en la base de datos y el servidor se habrá encargado de generar una *salt* para garantizar que el Hash es único.
 
-![registro guardado en BD](https://i.imgur.com/L6vwyoc.png)
+![Registro guardado en BD](https://i.imgur.com/L6vwyoc.png)
 
 Por lo que ahora, si *Pablo* quiere verificar el mensaje, simplemente tendrá que realizar una petición **POST** a la dirección **http://server_ip:puerto/sec/hash/validate**.
 
@@ -46,10 +49,11 @@ Por lo que ahora, si *Pablo* quiere verificar el mensaje, simplemente tendrá qu
 	"message": "Seguridad informática"
 }
 ```
+
 Y si es válido el mensaje, el servidor responderá *Válido*.
 
 ## Firma digital
-La generación y verificación de la firma digital se realizó con las librerías **Crypto-JS** para la generación de los hash y **crypto** para la implemetación del algoritmo RSA. Para generar la firma digital se utilizó el "método largo", el cual consiste en aplicar primero una función hash sobre la información, en este caso se aplicó SHA256, y luego hacer cifrado RSA con llave privada. Por lo que, es necesaria la llave pública para descifrar la firma.
+La generación y verificación de la firma digital se realizó con las librerías **Crypto-JS** para la generación de los hash y **crypto** para la implementación del algoritmo RSA. Para generar la firma digital se utilizó el "método largo", el cual consiste en aplicar primero una función hash sobre la información, en este caso se aplicó SHA256, y luego hacer cifrado RSA con llave privada. Por lo que, es necesaria la llave pública para descifrar la firma.
 
 ```js
 const hash = CryptoJS.SHA256(message).toString(CryptoJS.enc.Base64);
@@ -100,8 +104,8 @@ Si queremos validar la firma, debemos realizar una petición **POST** a la direc
 
 Si la firma es válida, el servidor retornará el atributo *valid* en *true*.
 
-## Cifrado y decifrado AES
-El cifrado y decifrado del algoritmo AES se realizó a través de la librería **Crypto-JS**. 
+## Cifrado y descifrado AES
+El cifrado y descifrado del algoritmo AES se realizó a través de la librería **Crypto-JS**. 
 
 ```js
 return CryptoJS.AES.encrypt(message, key).toString();
@@ -124,7 +128,7 @@ El servidor se encargará de cifrar el mensaje solicitado, con la llave ingresad
 }
 ```
 
-Si realizamos una solicitud **POST** a la dirección **http://server_ip:puerto/sec/aes/decrypt**, con los atributos: **cipherText**, como el texto cifrado y **key** como la llave, el servidor nos retornará el texto decifrado.
+Si realizamos una solicitud **POST** a la dirección **http://server_ip:puerto/sec/aes/decrypt**, con los atributos: **cipherText**, como el texto cifrado y **key** como la llave, el servidor nos retornará el texto descifrado.
 
 ```json
 {
@@ -132,10 +136,9 @@ Si realizamos una solicitud **POST** a la dirección **http://server_ip:puerto/s
 }
 ```
 
-## Cifrado y decifrado RSA
+## Cifrado y descifrado RSA
 
-Para realizar el cifrado y decifrado del algoritmo RSA se utilizó la librería **crypto** la cual es una librería integrada en node.js. Para cifrar con RSA primero genera las llaves publica y privada con un modulo de 2048 bits y en este caso, vamos a cifrar con clave publica y decifrar con clave privada. Esta implementación de RSA usa el formato de OpenSSH para las llaves.
-
+Para realizar el cifrado y descifrado del algoritmo RSA se utilizó la librería **crypto** la cual es una librería integrada en node.js. Para cifrar con RSA primero genera las llaves pública y privada con un módulo de 2048 bits y en este caso, vamos a cifrar con clave pública y descifrar con clave privada. Esta implementación de RSA usa el formato de OpenSSH para las llaves.
 
 ```js
 const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
@@ -154,7 +157,7 @@ Buffer.from(message)), privateKey };
 
 Para poder cifrar tenemos que hacer una consulta **POST** a la dirección **http://server_ip:puerto/sec/rsa/encrypt**, el cuerpo de la consulta solo debe llevar un atributo **message**.
 
-La respuesta del servidor será el texto cifrado y la clave privada para poder decifrarlo.
+La respuesta del servidor será el texto cifrado y la clave privada para poder descifrarlo.
 
 ```json
 {
@@ -165,7 +168,7 @@ La respuesta del servidor será el texto cifrado y la clave privada para poder d
 }
 ```
 
-Para poder decifrar el texto tendremos que hacer una petición **POST** a la dirección **http://server_ip:puerto/sec/rsa/decrypt**, junto a los atributos: **cipherText** y **privateKey**. Si se ingresan correctamente el servidor retornará el mensaje decifrado.
+Para poder descifrar el texto tendremos que hacer una petición **POST** a la dirección **http://server_ip:puerto/sec/rsa/decrypt**, junto a los atributos: **cipherText** y **privateKey**. Si se ingresan correctamente el servidor retornará el mensaje descifrado.
 
 ```json
 {
@@ -173,25 +176,25 @@ Para poder decifrar el texto tendremos que hacer una petición **POST** a la dir
 }
 ```
 
-## Cifrado y decifrado ECIES
-Para la realización del cifrado y decifrado con curvas elipticas se utilizó la librería **eccrypto**, para este ejercicio se utilizó Elliptic Curve Integrated Encryption Scheme (ECIES).
+## Cifrado y descifrado ECIES
+Para la realización del cifrado y descifrado con curvas elípticas se utilizó la librería **eccrypto**, para este ejercicio se utilizó Elliptic Curve Integrated Encryption Scheme (ECIES).
 
-Para cifrar se generaron las llaves publica y privada y se cifró con la llave publica, para decifrar con la privada.
+Para cifrar se generaron las llaves pública y privada y se cifró con la llave pública, para descifrar con la privada.
 
 ```js
 const privateKey = eccrypto.generatePrivate();
-  const publicKey = eccrypto.getPublic(privateKey);
-  try {
-    return {
-      cipherText: await eccrypto.encrypt(publicKey, Buffer.from(message)),
-      privateKey
-    };    
-  } catch (error) {
-    throw error;
-  }
+const publicKey = eccrypto.getPublic(privateKey);
+try {
+  return {
+    cipherText: await eccrypto.encrypt(publicKey, Buffer.from(message)),
+    privateKey
+  };    
+} catch (error) {
+  throw error;
+}
 ```
 
-Para poder cifrar se manda una petición **POST** a la dirección **http://server_ip:puerto/sec/ecies/encrypt**, con solo un atributo **message**, que es el mensaje que se quiere cifrar, el servidor retornará el mensaje cifrado junto a la información necesaria para poder decifrar nuevamente el mensaje.
+Para poder cifrar se manda una petición **POST** a la dirección **http://server_ip:puerto/sec/ecies/encrypt**, con solo un atributo **message**, que es el mensaje que se quiere cifrar, el servidor retornará el mensaje cifrado junto a la información necesaria para poder descifrar nuevamente el mensaje.
 
 ```json
 {
@@ -207,7 +210,7 @@ Para poder cifrar se manda una petición **POST** a la dirección **http://serve
 }
 ```
 
-Si pasamos estos mismos a tributos con una petición **POST** a la dirección **http://server_ip:puerto/sec/ecies/decrypt**, el servidor nos retornará en mensaje decifrado.
+Si pasamos estos mismos atributos con una petición **POST** a la dirección **http://server_ip:puerto/sec/ecies/decrypt**, el servidor nos retornará en mensaje descifrado.
 
 ```json
 {
